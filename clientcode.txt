@@ -1,0 +1,154 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Net;
+using System.Web.Script.Serialization;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class _Default : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+
+    }
+    
+    protected void btnAdd_Click(object sender, EventArgs e)
+    {
+        string a = txtOp1.Value;
+
+        string b = txtOp2.Value;
+
+        string url = String.Format("http://localhost:62855/RESTService/Service.svc/add/"+a+"/"+ b +"");
+
+        WebClient serviceRequest = new WebClient();
+        string response = serviceRequest.DownloadString(new Uri(url));
+        JavaScriptSerializer parser = new JavaScriptSerializer();
+        dynamic info = parser.Deserialize<dynamic>(response);
+
+        double r = info["result"];
+
+        txtResult.Value = r.ToString();
+
+        
+    }
+    protected void btnSub_Click(object sender, EventArgs e)
+    {
+        string a = txtOp1.Value;
+
+        string b = txtOp2.Value;
+
+        string url = String.Format("http://localhost:62855/RESTService/Service.svc/sub/" + a + "/" + b + "");
+
+        WebClient serviceRequest = new WebClient();
+        string response = serviceRequest.DownloadString(new Uri(url));
+        JavaScriptSerializer parser = new JavaScriptSerializer();
+        dynamic info = parser.Deserialize<dynamic>(response);
+
+        double r = info["result"];
+
+        txtResult.Value = r.ToString();
+        
+    }
+    protected void btnMul_Click(object sender, EventArgs e)
+    {
+        string a = txtOp1.Value;
+
+        string b = txtOp2.Value;
+
+        string url = String.Format("http://localhost:62855/RESTService/Service.svc/mul/" + a + "/" + b + "");
+
+        WebClient serviceRequest = new WebClient();
+        string response = serviceRequest.DownloadString(new Uri(url));
+        JavaScriptSerializer parser = new JavaScriptSerializer();
+        dynamic info = parser.Deserialize<dynamic>(response);
+
+        double r = info["result"];
+
+        txtResult.Value = r.ToString();
+        
+    }
+    protected void btnDiv_Click(object sender, EventArgs e)
+    {
+        string a = txtOp1.Value;
+
+        string b = txtOp2.Value;
+
+        string url = String.Format("http://localhost:62855/RESTService/Service.svc/div/" + a + "/" + b + "");
+
+        WebClient serviceRequest = new WebClient();
+        string response = serviceRequest.DownloadString(new Uri(url));
+        JavaScriptSerializer parser = new JavaScriptSerializer();
+        dynamic info = parser.Deserialize<dynamic>(response);
+
+        decimal r = info["result"];
+
+        txtResult.Value = r.ToString();
+       
+    }
+    protected void btnStoreResult_Click(object sender, EventArgs e)
+    {
+        string a = txtOp1.Value;
+
+        string b = txtOp2.Value;
+
+        string result = txtResult.Value;
+
+        SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["dbString"].ConnectionString);
+
+        conn.Open();
+
+        SqlCommand cmd = new SqlCommand("insert into Results(Op1,Op2,Result,Date) values ('"+a+"','"+b+"','"+result+"','"+ DateTime.Now+"')", conn);
+
+        cmd.ExecuteReader();
+
+        cmd.Dispose();
+
+        conn.Close();
+
+        lbl.Text = "<strong>Stored Successfully!!!</strong>";
+    }
+    protected void btnShowResult_Click(object sender, EventArgs e)
+    {
+        SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["dbString"].ConnectionString);
+
+        conn.Open();
+
+        SqlCommand cmd = new SqlCommand("Select Op1,Op2,Result from Results order by Date", conn);
+
+        SqlDataReader data = cmd.ExecuteReader();
+
+        string group = "<table class='table table-bordered'><tr class='success'> <th> S.No </td> <th>Operand1</th> <th>Operand2</th> <th style='text-align: center'> Result </th> </tr> ";
+        int count = 1;
+        while (data.Read())
+        {
+            group = group + "<tr>";
+
+            group = group + "<td>" + count + "</td>";
+
+            group = group + "<td>" + data["Op1"] + "</td>";
+
+            group = group + "<td>" + data["Op2"] + "</td>";
+
+            group = group + "<td>" + data["Result"] + "</td>";
+
+            group = group + "</tr>";
+
+            count++;
+
+        }
+
+        group = group + "</table>";
+
+        view.InnerHtml = group.ToString();
+
+
+
+    }
+}
+
+    
